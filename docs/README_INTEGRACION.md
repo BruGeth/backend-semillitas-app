@@ -37,9 +37,9 @@ Cuando decidan conectarlo, el único cambio es reemplazar el cuerpo de `login()`
 ## 5. Qué cubre cada artefacto de la rúbrica
 | Artefacto APF2 | Dónde está |
 |---|---|
-| Diseño físico BD + script | db/schema.sql (genera el diagrama ER desde esta BD) |
-| Patrón de acceso a datos | `usuario/UsuarioRepository`, `matricula/*Repository` + `MatriculaService` |
-| Auth y autorización | `auth/*`, `security/*`, `config/SecurityConfig` |
+| Diseño físico BD + script | db/schema.sql (Semillitas v2 con 11 tablas e índices optimizados) |
+| Patrón de acceso a datos | `usuario/*`, `matricula/*`, `salon/*`, `asistencia/*`, `salud/*` + Repositorios JPA |
+| Auth y autorización | `auth/*`, `security/*`, `config/SecurityConfig` (RBAC para DIRECTORA y DOCENTE) |
 | Cifrado / trazabilidad | BCrypt(12), JWT HS256, HTTPS del hosting, tabla `auditoria` + `AuditoriaService` |
 | RNF-012 inyección SQL | consultas JPA parametrizadas, Bean Validation, regex DNI + CHECK en BD, ZAP/sqlmap |
 | Catálogo de controles | tabla abajo |
@@ -49,19 +49,36 @@ Cuando decidan conectarlo, el único cambio es reemplazar el cuerpo de `login()`
 |---|---|---|---|
 | C-01 | Contraseñas con hash | OWASP A02 / ISO 27001 A.8.24 | BCrypt cost 12 |
 | C-02 | Autenticación stateless | OWASP A07 | JWT firmado, expira en 1 h |
-| C-03 | Control de acceso por rol | OWASP A01 / Ley 29733 | `hasRole` en SecurityConfig, 401/403 |
+| C-03 | Control de acceso por rol | OWASP A01 / Ley 29733 | `hasRole`/`hasAnyRole` en SecurityConfig, 401/403 |
 | C-04 | Prevención de inyección SQL | OWASP A03 / RNF-012 | JPA parametrizado + validación de entrada |
 | C-05 | Anti fuerza bruta | OWASP A07 | 5 fallos = bloqueo 15 min, 429 |
 | C-06 | Mensajes de error genéricos | OWASP A05 | login sin enumeración; handler global sin stack |
 | C-07 | Trazabilidad | OWASP A09 / RNF-007 | tabla `auditoria` (usuario, fecha, antes/después) |
-| C-08 | Secretos fuera del código | OWASP A05 | variables de entorno |
+| C-08 | Secretos fuera del código | OWASP A05 | variables de entorno con fallbacks de desarrollo |
 | C-09 | CORS restringido | OWASP A05 | solo el dominio del frontend |
 | C-10 | Cabeceras de seguridad | OWASP A05 | HSTS, X-Frame-Options deny |
-| C-11 | Restricciones en BD | integridad | CHECK de DNI/estados, FK, UNIQUE |
+| C-11 | Restricciones en BD | integridad | CHECK de DNI/estados, FK, UNIQUE e índices compuestos |
 | C-12 | Cifrado en tránsito | ISO 27001 A.8.24 | TLS del proveedor cloud |
 
-## 7. Pendiente / límites (sé honesto en la sustentación)
-- No pude compilar aquí (sin acceso a Maven). Compílalo y corrige cualquier detalle de versión: tu pom usa Spring Boot 4.1.1.
-- Asistencia, evaluaciones, salud, import/export y documentos de matrícula tienen tabla pero aún no endpoints.
+## 7. Módulos y Endpoints Implementados
+- **Auth**: `/api/auth/login` (Directora, Docente, Padre).
+- **Matrículas y Niños**: `/api/matriculas` (POST preinscribir), `/api/matriculas/ninos` (GET listar/buscar).
+- **Salones**: `/api/salones` (GET listar, GET por id, POST crear con capacidad y edad).
+- **Asistencia (RF-006)**:
+  - `/api/asistencias/ninos` (POST registrar/actualizar por salón y turno).
+  - `/api/asistencias/salon/{salonId}` (GET listar asistencia diaria por salón).
+  - `/api/asistencias/nino/{ninoId}` (GET historial por niño).
+  - `/api/asistencias/docente` (POST marcar entrada/salida docente).
+  - `/api/asistencias/docente/hoy` (GET consultar asistencia de hoy).
+- **Control de Salud (RF-011)**:
+  - `/api/salud` (POST registrar peso, talla, alerta, próxima fecha).
+  - `/api/salud/nino/{ninoId}` (GET historial del niño).
+  - `/api/salud/alertas` (GET controles con alerta activa).
+  - `/api/salud/proximos` (GET controles programados en próximos días).
+- **Auditoría (RNF-007)**: `/api/auditoria` (GET últimos 50 eventos).
+- **Actuator**: `/actuator/health`, `/actuator/metrics`.
+
+## 8. Pendiente / límites (sé honesto en la sustentación)
+- Evaluaciones, import/export y documentos de matrícula tienen tabla en el esquema físico v2 y pueden extenderse de forma análoga.
 - Anti fuerza bruta es en memoria (se reinicia al reiniciar y no escala a varias instancias).
-- Replicación: es propuesta documental (primario + réplica de lectura), no la implementas.
+- Replicación: es propuesta documental (primario + réplica de lectura).
