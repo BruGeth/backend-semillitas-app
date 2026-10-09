@@ -1,3 +1,35 @@
 spring:
   application:
     name: backend
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/semillitas?useSSL=false&serverTimezone=America/Lima}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: none          # el esquema sale de db/schema.sql
+    open-in-view: false
+  web:
+    error:
+      include-stacktrace: never
+      include-message: never
+
+server:
+  port: ${PORT:8080}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:semillitas_jwt_secret_local_dev_32chars_min!}      # en producción configurar variable de entorno JWT_SECRET
+    expiration-ms: 3600000     # 1 hora
+  cors:
+    allowed-origins: ${CORS_ORIGINS:http://localhost:5173}
+  seed:
+    enabled: ${SEED_ENABLED:true}
+    password: ${SEED_PASSWORD:semillitas123}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics
+        
