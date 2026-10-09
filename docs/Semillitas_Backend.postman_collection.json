@@ -197,7 +197,79 @@
 			]
 		},
 		{
-			"name": "2. Matrículas y Niños",
+			"name": "2. Salones",
+			"item": [
+				{
+					"name": "Listar todos los Salones",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/salones",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salones"
+							]
+						},
+						"description": "Lista todos los salones con edad, turno, capacidad y docente asignado."
+					},
+					"response": []
+				},
+				{
+					"name": "Crear Salón",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Aula Verde (4 años)\",\n  \"edad\": 4,\n  \"turno\": \"TARDE\",\n  \"capacidad\": 28,\n  \"docenteId\": 2\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/salones",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salones"
+							]
+						},
+						"description": "Crea un nuevo salón con restricción CHECK de capacidad (1-40) y edad (3-5)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Matrículas y Niños",
 			"item": [
 				{
 					"name": "Registrar Preinscripción (Directora)",
@@ -221,7 +293,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"dniNino\": \"70123456\",\n  \"nombres\": \"Mateo\",\n  \"apellidos\": \"Pérez Gómez\",\n  \"fechaNacimiento\": \"2021-05-10\",\n  \"dniApoderado\": \"11223344\"\n}"
+							"raw": "{\n  \"dniNino\": \"70998877\",\n  \"nombres\": \"Sofía\",\n  \"apellidos\": \"Ramírez Torres\",\n  \"fechaNacimiento\": \"2021-08-20\",\n  \"dniApoderado\": \"11223344\"\n}"
 						},
 						"url": {
 							"raw": "{{baseUrl}}/api/matriculas",
@@ -307,7 +379,329 @@
 			]
 		},
 		{
-			"name": "3. Auditoría",
+			"name": "4. Asistencia (RF-006)",
+			"item": [
+				{
+					"name": "Registrar Asistencia de Niño",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ninoId\": 1,\n  \"salonId\": 1,\n  \"fecha\": \"2026-10-09\",\n  \"hora\": \"08:10:00\",\n  \"turno\": \"MANANA\",\n  \"estado\": \"ASISTIO\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/asistencias/ninos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"asistencias",
+								"ninos"
+							]
+						},
+						"description": "Registra o actualiza la asistencia del niño (ASISTIO, TARDANZA, FALTA, JUSTIFICADO)."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Asistencia por Salón y Fecha",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/asistencias/salon/1?fecha=2026-10-09",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"asistencias",
+								"salon",
+								"1"
+							],
+							"query": [
+								{
+									"key": "fecha",
+									"value": "2026-10-09"
+								}
+							]
+						},
+						"description": "Usa el índice optimizado idx_asistencia_salon_fecha."
+					},
+					"response": []
+				},
+				{
+					"name": "Historial de Asistencia de un Niño",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/asistencias/nino/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"asistencias",
+								"nino",
+								"1"
+							]
+						},
+						"description": "Historial cronológico de asistencias del niño."
+					},
+					"response": []
+				},
+				{
+					"name": "Marcar Asistencia Docente (Entrada/Salida)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"fecha\": \"2026-10-09\",\n  \"horaEntrada\": \"07:50:00\",\n  \"horaSalida\": \"13:10:00\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/asistencias/docente",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"asistencias",
+								"docente"
+							]
+						},
+						"description": "Registra la hora de entrada y/o salida del docente autenticado."
+					},
+					"response": []
+				},
+				{
+					"name": "Consultar Mi Asistencia Docente de Hoy",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/asistencias/docente/hoy",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"asistencias",
+								"docente",
+								"hoy"
+							]
+						},
+						"description": "Obtiene la marca del día actual del docente."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "5. Control de Salud (RF-011)",
+			"item": [
+				{
+					"name": "Registrar Control de Salud",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"ninoId\": 1,\n  \"tipo\": \"CONTROL_PESO_TALLA\",\n  \"fecha\": \"2026-10-09\",\n  \"pesoKg\": 14.8,\n  \"tallaCm\": 95.5,\n  \"proximaFecha\": \"2026-12-15\",\n  \"alerta\": false,\n  \"observacion\": \"Control periódico en rango normal.\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/salud",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salud"
+							]
+						},
+						"description": "Registra datos antropométricos, próxima cita y bandera de alerta."
+					},
+					"response": []
+				},
+				{
+					"name": "Historial de Salud de un Niño",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/salud/nino/1",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salud",
+								"nino",
+								"1"
+							]
+						},
+						"description": "Retorna todos los controles médicos registrados para el niño."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Controles con Alerta Activa",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/salud/alertas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salud",
+								"alertas"
+							]
+						},
+						"description": "Filtra controles marcados con alerta (bajo peso, desnutrición o anomalías)."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar Próximos Controles Programados",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/salud/proximos?dias=30",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"salud",
+								"proximos"
+							],
+							"query": [
+								{
+									"key": "dias",
+									"value": "30"
+								}
+							]
+						},
+						"description": "Usa el índice idx_salud_proxima para optimizar consultas de calendario."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "6. Auditoría (RNF-007)",
 			"item": [
 				{
 					"name": "Listar últimos 50 eventos de auditoría",
@@ -341,7 +735,7 @@
 			]
 		},
 		{
-			"name": "4. Actuator (Salud y Monitoreo)",
+			"name": "7. Actuator (Monitoreo)",
 			"item": [
 				{
 					"name": "Health Check",
@@ -397,4 +791,3 @@
 		}
 	]
 }
-

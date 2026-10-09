@@ -44,9 +44,12 @@ public class SecurityConfig {
             .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000)))
         .authorizeHttpRequests(a -> a
             .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-            .requestMatchers("/api/auth/login", "/actuator/health").permitAll()
+            .requestMatchers("/api/auth/login", "/actuator/health", "/actuator/metrics").permitAll()
             .requestMatchers("/api/matriculas/**").hasRole("DIRECTORA")
             .requestMatchers("/api/auditoria/**").hasRole("DIRECTORA")
+            .requestMatchers("/api/salones/**").hasAnyRole("DIRECTORA", "DOCENTE")
+            .requestMatchers("/api/asistencias/**").hasAnyRole("DIRECTORA", "DOCENTE")
+            .requestMatchers("/api/salud/**").hasAnyRole("DIRECTORA", "DOCENTE")
             .anyRequest().authenticated())
         .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
         .build();
