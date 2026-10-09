@@ -1,0 +1,400 @@
+{
+	"info": {
+		"_postman_id": "b3e04cf4-7d52-4a0b-85d1-92576bbf8241",
+		"name": "Semillitas Backend API",
+		"description": "Colección completa de endpoints para el backend del nido Semillitas.\n\n### Autenticación\nAl ejecutar cualquiera de las peticiones de **Login**, el script de prueba guarda automáticamente el JWT en la variable `{{token}}` de la colección, permitiendo ejecutar las peticiones protegidas sin tener que copiar y pegar el token manualmente.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Autenticación",
+			"item": [
+				{
+					"name": "Login - Directora (Admin)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var data = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", data.token);",
+									"    pm.test(\"Login exitoso y token guardado\", function () {",
+									"        pm.expect(data.token).to.be.a('string');",
+									"        pm.expect(data.user.role).to.eql('directora');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dni\": \"12345678\",\n  \"password\": \"semillitas123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Inicia sesión como Directora. Guarda el JWT automáticamente en la variable {{token}}."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Docente",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var data = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", data.token);",
+									"    pm.test(\"Login exitoso como Docente\", function () {",
+									"        pm.expect(data.token).to.be.a('string');",
+									"        pm.expect(data.user.role).to.eql('docente');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dni\": \"87654321\",\n  \"password\": \"semillitas123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Inicia sesión como Docente (Sección A)."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Padre / Apoderado",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"if (pm.response.code === 200) {",
+									"    var data = pm.response.json();",
+									"    pm.collectionVariables.set(\"token\", data.token);",
+									"    pm.test(\"Login exitoso como Padre\", function () {",
+									"        pm.expect(data.token).to.be.a('string');",
+									"        pm.expect(data.user.role).to.eql('padre');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dni\": \"11223344\",\n  \"password\": \"semillitas123\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Inicia sesión como Padre de familia."
+					},
+					"response": []
+				},
+				{
+					"name": "Login - Credenciales inválidas (401)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Responde 401 Credenciales inválidas\", function () {",
+									"    pm.response.to.have.status(401);",
+									"    var data = pm.response.json();",
+									"    pm.expect(data.error).to.eql(\"Credenciales inválidas\");",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dni\": \"12345678\",\n  \"password\": \"clave_incorrecta\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"login"
+							]
+						},
+						"description": "Prueba de autenticación fallida (debe registrar intento fallido en tabla auditoria)."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Matrículas y Niños",
+			"item": [
+				{
+					"name": "Registrar Preinscripción (Directora)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"dniNino\": \"70123456\",\n  \"nombres\": \"Mateo\",\n  \"apellidos\": \"Pérez Gómez\",\n  \"fechaNacimiento\": \"2021-05-10\",\n  \"dniApoderado\": \"11223344\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/api/matriculas",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"matriculas"
+							]
+						},
+						"description": "Registra a un nuevo niño y crea la matrícula en estado PREINSCRITO. Requiere rol DIRECTORA."
+					},
+					"response": []
+				},
+				{
+					"name": "Listar todos los Niños (Directora)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/matriculas/ninos",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"matriculas",
+								"ninos"
+							]
+						},
+						"description": "Obtiene la lista completa de niños registrados. Requiere rol DIRECTORA."
+					},
+					"response": []
+				},
+				{
+					"name": "Buscar Niños por texto (DNI o Nombre)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/matriculas/ninos?texto=Mateo",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"matriculas",
+								"ninos"
+							],
+							"query": [
+								{
+									"key": "texto",
+									"value": "Mateo",
+									"description": "Filtra por nombre, apellido o DNI"
+								}
+							]
+						},
+						"description": "Búsqueda parametrizada con prevención de SQL Injection."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Auditoría",
+			"item": [
+				{
+					"name": "Listar últimos 50 eventos de auditoría",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{token}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/auditoria",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"auditoria"
+							]
+						},
+						"description": "Retorna los últimos 50 registros de auditoría (trazabilidad de logins, cambios y preinscripciones). Requiere rol DIRECTORA."
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Actuator (Salud y Monitoreo)",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"health"
+							]
+						},
+						"description": "Estado de salud del servidor y conexión a base de datos (público)."
+					},
+					"response": []
+				},
+				{
+					"name": "Métricas del Sistema",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/actuator/metrics",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"actuator",
+								"metrics"
+							]
+						},
+						"description": "Listado de métricas expuestas por Spring Boot Actuator."
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+
