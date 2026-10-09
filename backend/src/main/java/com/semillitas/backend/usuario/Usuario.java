@@ -22,6 +22,9 @@ public class Usuario {
   @Column(nullable = false, length = 80)
   private String apellidos;
 
+  @Column(length = 15)
+  private String telefono;
+
   @Column(length = 120)
   private String email;
 

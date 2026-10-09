@@ -1,4 +1,4 @@
--- Semillitas - esquema físico MySQL / MariaDB
+-- Semillitas - esquema físico MySQL / MariaDB (v2)
 CREATE DATABASE IF NOT EXISTS semillitas CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 USE semillitas;
 
@@ -12,6 +12,7 @@ CREATE TABLE usuario (
   dni VARCHAR(8) NOT NULL UNIQUE,
   nombres VARCHAR(80) NOT NULL,
   apellidos VARCHAR(80) NOT NULL,
+  telefono VARCHAR(15) NULL,
   email VARCHAR(120) NULL,
   seccion VARCHAR(10) NULL,                      -- solo docentes
   password_hash VARCHAR(100) NOT NULL,           -- BCrypt
@@ -27,9 +28,11 @@ CREATE TABLE salon (
   nombre VARCHAR(50) NOT NULL,
   edad TINYINT NOT NULL,
   turno VARCHAR(10) NOT NULL,
+  capacidad SMALLINT NOT NULL DEFAULT 25,
   docente_id BIGINT NULL,
   CONSTRAINT ck_salon_edad CHECK (edad BETWEEN 3 AND 5),
   CONSTRAINT ck_salon_turno CHECK (turno IN ('MANANA','TARDE')),
+  CONSTRAINT ck_salon_capacidad CHECK (capacidad BETWEEN 1 AND 40),
   CONSTRAINT fk_salon_docente FOREIGN KEY (docente_id) REFERENCES usuario(id)
 ) ENGINE=InnoDB;
 
@@ -63,26 +66,31 @@ CREATE TABLE documento_matricula (
   matricula_id BIGINT NOT NULL,
   tipo VARCHAR(30) NOT NULL,
   estado VARCHAR(10) NOT NULL DEFAULT 'PENDIENTE',
+  fecha_entrega DATETIME NULL,
   CONSTRAINT ck_doc_tipo CHECK (tipo IN ('DNI_PADRE','DNI_NINO','DIRECCION','FICHA_NINO_SANO')),
   CONSTRAINT ck_doc_estado CHECK (estado IN ('PENDIENTE','COMPLETO')),
   CONSTRAINT uq_doc UNIQUE (matricula_id, tipo),
   CONSTRAINT fk_doc_matricula FOREIGN KEY (matricula_id) REFERENCES matricula(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-CREATE TABLE asistencia (            -- asistencia de niños
+CREATE TABLE asistencia (            -- asistencia de niños (RF-006)
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   nino_id BIGINT NOT NULL,
+  salon_id BIGINT NOT NULL,
   fecha DATE NOT NULL,
   hora TIME NOT NULL,
-  estado VARCHAR(10) NOT NULL,
+  turno VARCHAR(10) NOT NULL,
+  estado VARCHAR(12) NOT NULL,
   registrado_por BIGINT NOT NULL,
-  CONSTRAINT ck_asist_estado CHECK (estado IN ('ASISTIO','TARDANZA','FALTA')),
+  CONSTRAINT ck_asist_turno CHECK (turno IN ('MANANA','TARDE')),
+  CONSTRAINT ck_asist_estado CHECK (estado IN ('ASISTIO','TARDANZA','FALTA','JUSTIFICADO')),
   CONSTRAINT uq_asist UNIQUE (nino_id, fecha),
   CONSTRAINT fk_asist_nino FOREIGN KEY (nino_id) REFERENCES nino(id),
+  CONSTRAINT fk_asist_salon FOREIGN KEY (salon_id) REFERENCES salon(id),
   CONSTRAINT fk_asist_usuario FOREIGN KEY (registrado_por) REFERENCES usuario(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE asistencia_docente (    -- tu frontend marca entrada/salida del docente
+CREATE TABLE asistencia_docente (    -- asistencia docente (entrada/salida)
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   docente_id BIGINT NOT NULL,
   fecha DATE NOT NULL,
@@ -106,12 +114,15 @@ CREATE TABLE evaluacion (
   CONSTRAINT fk_eval_docente FOREIGN KEY (docente_id) REFERENCES usuario(id)
 ) ENGINE=InnoDB;
 
-CREATE TABLE control_salud (
+CREATE TABLE control_salud (         -- control de salud (RF-011)
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   nino_id BIGINT NOT NULL,
   tipo VARCHAR(30) NOT NULL,
   fecha DATE NOT NULL,
+  peso_kg DECIMAL(4,1) NULL,
+  talla_cm DECIMAL(4,1) NULL,
   proxima_fecha DATE NULL,
+  alerta BOOLEAN NOT NULL DEFAULT FALSE,
   observacion TEXT NULL,
   CONSTRAINT fk_salud_nino FOREIGN KEY (nino_id) REFERENCES nino(id)
 ) ENGINE=InnoDB;
@@ -127,7 +138,9 @@ CREATE TABLE auditoria (             -- RNF-007
   fecha DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-CREATE INDEX idx_asistencia_fecha ON asistencia(fecha);
+-- Índices clave optimizados
+CREATE INDEX idx_asistencia_salon_fecha ON asistencia(salon_id, fecha);
+CREATE INDEX idx_salud_proxima ON control_salud(proxima_fecha);
 CREATE INDEX idx_nino_salon ON nino(salon_id);
 CREATE INDEX idx_nino_apellidos ON nino(apellidos);
 CREATE INDEX idx_auditoria_tabla ON auditoria(tabla, registro_id);

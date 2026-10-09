@@ -22,18 +22,18 @@ public class DataSeeder {
       if (!enabled) return;
       if (password == null || password.length() < 6)
         throw new IllegalStateException("SEED_PASSWORD requerido (mínimo 6 caracteres)");
-      crear(usuarios, roles, encoder, "12345678", "María", "García", "maria@semillitas.edu.pe", null, "DIRECTORA", password);
-      crear(usuarios, roles, encoder, "87654321", "Ana", "López", "ana@semillitas.edu.pe", "A", "DOCENTE", password);
-      crear(usuarios, roles, encoder, "11223344", "Carlos", "Pérez", "carlos@email.com", null, "PADRE", password);
+      crear(usuarios, roles, encoder, "12345678", "María", "García", "987111222", "maria@semillitas.edu.pe", null, "DIRECTORA", password);
+      crear(usuarios, roles, encoder, "87654321", "Ana", "López", "987333444", "ana@semillitas.edu.pe", "A", "DOCENTE", password);
+      crear(usuarios, roles, encoder, "11223344", "Carlos", "Pérez", "987555666", "carlos@email.com", null, "PADRE", password);
     };
   }
 
   private void crear(UsuarioRepository usuarios, RolRepository roles, PasswordEncoder encoder, String dni,
-                     String nombres, String apellidos, String email, String seccion, String rolNombre, String pass) {
+                     String nombres, String apellidos, String telefono, String email, String seccion, String rolNombre, String pass) {
     if (usuarios.existsByDni(dni)) return;
     Rol rol = roles.findByNombre(rolNombre).orElseThrow();
     Usuario u = new Usuario();
-    u.setDni(dni); u.setNombres(nombres); u.setApellidos(apellidos); u.setEmail(email);
+    u.setDni(dni); u.setNombres(nombres); u.setApellidos(apellidos); u.setTelefono(telefono); u.setEmail(email);
     u.setSeccion(seccion); u.setRol(rol); u.setPasswordHash(encoder.encode(pass));
     usuarios.save(u);
   }
