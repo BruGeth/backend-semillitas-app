@@ -5,10 +5,12 @@ import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "usuario")
 @Getter @Setter @NoArgsConstructor
+
 public class Usuario {
   @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
@@ -31,6 +33,7 @@ public class Usuario {
   @Column(length = 10)
   private String seccion;
 
+  @JsonIgnore
   @Column(name = "password_hash", nullable = false, length = 100)
   private String passwordHash;
 
@@ -43,6 +46,7 @@ public class Usuario {
 
   @Column(name = "creado_en", insertable = false, updatable = false)
   private LocalDateTime creadoEn;
+ 
 
   public String nombreCompleto() { return nombres + " " + apellidos; }
 }
