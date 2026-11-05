@@ -13,13 +13,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
+  private static final Logger log = LoggerFactory.getLogger(JwtFilter.class);
+
   private final JwtService jwt;
 
-  public JwtFilter(JwtService jwt) { this.jwt = jwt; }
+  public JwtFilter(JwtService jwt) {
+    this.jwt = jwt;
+  }
 
   @Override
   protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain chain)
@@ -33,7 +39,11 @@ public class JwtFilter extends OncePerRequestFilter {
             c.getSubject(), null, List.of(new SimpleGrantedAuthority("ROLE_" + rol)));
         SecurityContextHolder.getContext().setAuthentication(auth);
       } catch (JwtException | IllegalArgumentException e) {
-        SecurityContextHolder.clearContext(); // token inválido -> queda sin autenticar -> 401
+        SecurityContextHolder.clearContext();
+        log.warn(
+            "JWT rechazado en {}: {}",
+            req.getRequestURI(),
+            e.getClass().getSimpleName());
       }
     }
     chain.doFilter(req, res);
